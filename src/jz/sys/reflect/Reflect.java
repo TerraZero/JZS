@@ -55,6 +55,12 @@ public class Reflect {
 		return (type)this.reflect;
 	}
 	
+	public Reflect getSuper() {
+		if (this.reflectClass.equals(Object.class)) return null;
+		
+		return new Reflect(this.reflectClass.getSuperclass(), this.reflect);
+	}
+	
 	/**
 	 * Load a reflecttype for this reflect
 	 * 
