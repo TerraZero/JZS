@@ -1,40 +1,33 @@
 package jz.sys.utils.maps.amaps;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Consumer;
 
 public class AMapPath<type> {
 
-	private List<AMapNode<type>> path;
+	private AMapNode target;
+	private AMap<type> map;
 	
-	public AMapPath() {
-		this.path = new ArrayList<AMapNode<type>>();
+	public AMapPath(AMapNode target, AMap<type> map) {
+		this.target = target;
+		this.map = map;
 	}
 	
-	public List<AMapNode<type>> path() {
-		return this.path;
+	public AMapNode target() {
+		return this.target;
 	}
 	
-	public AMapPath<type> reset() {
-		this.path.clear();
+	public AMapPath<type> each(Consumer<AMapNode> consumer) {
+		AMapNode node = this.target;
+		
+		do {
+			consumer.accept(node);
+			node = node.predecessor;
+		} while (node != null);
 		return this;
 	}
 	
-	public AMapNode<type> get(int position) {
-		return this.path.get(position);
-	}
-	
-	public type value(int position) {
-		return this.path.get(position).value();
-	}
-	
-	public AMapPath<type> add(AMapNode<type> item) {
-		this.path.add(item);
-		return this;
-	}
-	
-	public int length() {
-		return this.path.size();
+	public int cost() {
+		return this.target.g;
 	}
  	
 }

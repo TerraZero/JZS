@@ -8,23 +8,25 @@ public class AMapTest {
 		String[][] s = new String[5][5];
 		
 		Lists.iterate(s, (x, y, v) -> {
-			return x + ":" + y;
+			if (y == 3 && x != 0) {
+				return "10";
+			}
+			return "1";
 		});
 		
-		AMap<String> map = new AMap<String>(s);
+		final AMap<String> map = new AMap<String>(s);
 		
-		AMapPointer<String> p = map.pointer(2, 3);
-		System.out.println(p.strict(true).get());
-		
-		for (int i = 0; i < 10; i++) {
-			p.bottom();
-		}
-		System.out.println(p.get());
-		map.setCalc((i) -> {
-			return i.value().length();
+		map.setCalc((item) -> {
+			System.out.println(item);
+			return Integer.parseInt(item);
 		});
 		
-		map.calc(2, 2);
+		AMapPath<String> path = map.path(2, 2, 4, 4);
+		
+		path.each((node) -> {
+			System.out.println(node.x + ":" + node.y);
+		});
+		System.out.println(path.cost());
 	}
 	
 }

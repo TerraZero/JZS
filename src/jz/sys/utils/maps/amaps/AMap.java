@@ -1,8 +1,5 @@
 package jz.sys.utils.maps.amaps;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class AMap<type> {
 
 	private type[][] map;
@@ -10,8 +7,13 @@ public class AMap<type> {
 	private AMapCalc<type> calc;
 	
 	public AMap(type[][] map) {
-		this.map = map;
+		this.setMap(map);
 		this.calc = null;
+	}
+	
+	public AMap<type> setMap(type[][] map) {
+		this.map = map;
+		return this;
 	}
 	
 	public type[][] map() {
@@ -55,29 +57,44 @@ public class AMap<type> {
 		return this.calc;
 	}
 	
-	public AMapPath<type> calc(int x, int y, int tx, int ty) {
-		AMapPath<type> path = new AMapPath<type>();
+	public AMapPath<type> path(int x, int y, int tx, int ty) {
 		AMapList open = new AMapList();
 		AMapList close = new AMapList();
 		
-		open.add(new AMapNode(x, y), 0);
+		AMapNode target = new AMapNode(tx, ty);
 		
+		open.add(new AMapNode(x, y), 0);
 		do {
 			AMapNode node = open.pop();
 			
-			if (node.x == tx && node.y == ty) {
-				return path;
+			if (node.is(target)) {
+				return new AMapPath<type>(node, this);
 			}
 			close.add(node);
 			
-			// right
-			if (this.valid(node.x + 1, node.y)) {
-				AMapNode r = this.node(node.x + 1, node.y);
+			AMapNode[] successors = this.nodeSuccessor(node);
 				
+			for (AMapNode successor : successors) {
+				if (successor == null || close.contain(successor)) continue;
+				
+				int dg = this.g(node) + this.calc.cost(this.get(successor));
+				
+				if (open.contain(successor) && dg >= open.entry(successor).g) continue;
+				
+				successor.predecessor = node;
+				successor.g = dg;
+				
+				int f = dg + this.h(successor, target);
+				if (open.contain(successor)) {
+					open.entry(successor).f = f;
+				} else {
+					successor.f = f;
+					open.add(successor);
+				}
 			}
 		} while (open.length() != 0);
 		
-		return path;
+		return null;
 	}
 	
 	public AMapNode[] nodeSuccessor(AMapNode node) {
@@ -90,10 +107,38 @@ public class AMap<type> {
 		
 		// right
 		if (this.valid(node.x + 1, node.y)) {
-			
+			successors[1] = this.node(node.x + 1, node.y); 
+		}
+		
+		// bottom
+		if (this.valid(node.x, node.y + 1)) {
+			successors[2] = this.node(node.x, node.y + 1); 
+		}
+		
+		// left
+		if (this.valid(node.x - 1, node.y)) {
+			successors[3] = this.node(node.x - 1, node.y); 
 		}
 		
 		return successors;
+	}
+	
+	public type get(AMapNode node) {
+		return this.map[node.x][node.y];
+	}
+	
+	public int h(AMapNode node, AMapNode target) {
+		return Math.abs(node.x - target.x) + Math.abs(node.y - target.y);
+	}
+	
+	public int g(AMapNode node) {
+		int g = 0;
+		
+		while (node.predecessor != null) {
+			g += this.calc.cost(this.get(node));
+			node = node.predecessor;
+		}
+		return g;
 	}
 	
 }

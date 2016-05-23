@@ -48,6 +48,15 @@ public class AMapList {
 		return this.nodes.size();
 	}
 	
+	public AMapNode entry(AMapNode instance) {
+		for (AMapNode node : this.nodes) {
+			if (node.is(instance)) {
+				return node;
+			}
+		}
+		return null;
+	}
+	
 	public boolean contain(AMapNode node) {
 		for (AMapNode i : this.nodes) {
 			if (i.x == node.x && i.y == node.y) return true;
