@@ -5,11 +5,9 @@ import java.util.function.Consumer;
 public class AMapPath<type> {
 
 	private AMapNode target;
-	private AMap<type> map;
 	
-	public AMapPath(AMapNode target, AMap<type> map) {
+	public AMapPath(AMapNode target) {
 		this.target = target;
-		this.map = map;
 	}
 	
 	public AMapNode target() {

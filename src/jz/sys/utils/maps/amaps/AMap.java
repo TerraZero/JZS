@@ -68,33 +68,59 @@ public class AMap<type> {
 			AMapNode node = open.pop();
 			
 			if (node.is(target)) {
-				return new AMapPath<type>(node, this);
+				return new AMapPath<type>(node);
 			}
 			close.add(node);
 			
 			AMapNode[] successors = this.nodeSuccessor(node);
-				
-			for (AMapNode successor : successors) {
-				if (successor == null || close.contain(successor)) continue;
-				
-				int dg = this.g(node) + this.calc.cost(this.get(successor));
-				
-				if (open.contain(successor) && dg >= open.entry(successor).g) continue;
-				
-				successor.predecessor = node;
-				successor.g = dg;
-				
-				int f = dg + this.h(successor, target);
-				if (open.contain(successor)) {
-					open.entry(successor).f = f;
-				} else {
-					successor.f = f;
-					open.add(successor);
-				}
-			}
+			this.calcSuccessors(successors, open, close, node, target);
 		} while (open.length() != 0);
 		
 		return null;
+	}
+	
+	public AMapRange range(int x, int y, int range) {
+		AMapList open = new AMapList();
+		AMapList close = new AMapList();
+		AMapNode start = new AMapNode(x, y);
+		
+		open.add(start, 0);
+		do {
+			AMapNode node = open.pop();
+			
+			if (this.g(node) > range) continue;
+			close.add(node);
+			
+			AMapNode[] successors = this.nodeSuccessor(node);
+			this.calcSuccessors(successors, open, close, node, null);
+		} while (open.length() != 0);
+		
+		return new AMapRange(start, range, close);
+	}
+	
+	public void calcSuccessors(AMapNode[] successors, AMapList open, AMapList close, AMapNode node, AMapNode target) {
+		for (AMapNode successor : successors) {
+			if (successor == null || close.contain(successor)) continue;
+			
+			int dg = this.g(node) + this.calc.cost(this.get(successor));
+			
+			if (open.contain(successor) && dg >= open.entry(successor).g) continue;
+			
+			successor.predecessor = node;
+			successor.g = dg;
+			
+			int f = dg;
+			if (target != null) {
+				f += this.h(successor, target);
+			}
+			
+			if (open.contain(successor)) {
+				open.entry(successor).f = f;
+			} else {
+				successor.f = f;
+				open.add(successor);
+			}
+		}
 	}
 	
 	public AMapNode[] nodeSuccessor(AMapNode node) {
